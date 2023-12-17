@@ -1,0 +1,3 @@
+[submodule "data/bse"]
+	path = data/bse
+	url = https://github.com/MolSSI-BSE/basis_set_exchange.git

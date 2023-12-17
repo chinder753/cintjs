@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@types/node": "^20.10.4"
+  },
+  "name": "ts",
+  "version": "1.0.0",
+  "main": "test.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "node dist/test.js",
+    "build": "tsc && cp -r src/wasm dist/ && node dist/test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module"
+}
