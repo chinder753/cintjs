@@ -1,7 +1,3 @@
-import { FixedLengthArray } from "./extype.js";
-
-
-
 export { Basis };
 
 

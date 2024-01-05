@@ -1,3 +1,6 @@
 [submodule "data/bse"]
 	path = data/bse
 	url = https://github.com/MolSSI-BSE/basis_set_exchange.git
+[submodule "data/Periodic-Table-JSON"]
+	path = data/Periodic-Table-JSON
+	url = https://github.com/Bowserinator/Periodic-Table-JSON.git

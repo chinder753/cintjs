@@ -1,21 +1,22 @@
+import { JsonBasis } from "./extype";
+
+
+
 export { BSE };
 
-import { Basis } from "./basis.js";
-import { FixedLengthArray } from "./extype.js";
+type ReturnJsonBasis<T extends string | Set<string>> = T extends string ? JsonBasis[] : JsonBasis[][];
 
-
-
-type ShellInfo<NP extends number, NC extends number> = {
+type ShellInfo = {
     function_type: string;
     region: string;
-    angular_momentum: FixedLengthArray<number, NP>;
-    exponents: FixedLengthArray<number, NP>;
-    coefficients: FixedLengthArray<FixedLengthArray<number, NP>, NC>;
+    angular_momentum: number[];
+    exponents: string[];
+    coefficients: string[][];
 }
 
 type ElementInfo = {
     references: string[];
-    electron_shells: ShellInfo<number, number>[];
+    electron_shells: ShellInfo[];
 }
 
 
@@ -37,27 +38,41 @@ class BSE {
         this.elements = new Map(Object.entries(basis.elements));
     }
 
-    public getElementInfoFor(element: string | number): ElementInfo {
-        if (typeof element == "number") element = element.toString();
+    public getElementInfoFor(element: string): ElementInfo {
         if (!this.elements.has(element)) throw `没有${element}号元素的基组`;
         return <ElementInfo>this.elements.get(element);
     }
 
-    public getBasisFor(element: string | number, kappa: number = 0): Basis[] {
-        if (typeof element == "number") element = element.toString();
-        if (!this.elements.has(element)) throw `没有${element}号元素的基组`;
 
-        let nuclear_charge = parseFloat(element);
-        let basis_list: Basis[] = [];
-        (<ElementInfo>this.elements.get(element)).electron_shells.forEach((shell: ShellInfo<number, number>): void => {
-            basis_list.push(
-                new Basis(nuclear_charge, shell.angular_momentum
-                    , {
-                        exponents: shell.exponents,
-                        coefficients: shell.coefficients
-                    }, kappa));
-        });
-        return basis_list;
+    public getJsonBasis<T extends string | Set<string>>(element_num: T): ReturnJsonBasis<T> {
+        function getOneJsonBasis(element_info: ElementInfo): JsonBasis[]{
+            let json_basis: JsonBasis[] = [];
+            element_info.electron_shells.forEach((shell_info: ShellInfo): void => {
+                json_basis.push({
+                    KAPPA_OF: 0
+                    , angular_momentum: shell_info.angular_momentum
+                    , exponents: shell_info.exponents.map(Number)
+                    , coefficients: shell_info.coefficients.map((v) => v.map(Number))
+                });
+            });
+            return json_basis;
+        }
+
+        let json_basis: ReturnJsonBasis<T> = [];
+
+        if (typeof element_num == "string") {
+            let element_info = this.getElementInfoFor(element_num);
+            // @ts-ignore
+            json_basis = getOneJsonBasis(element_info);
+        } else {
+            element_num.forEach((atm_num: string) => {
+                // @ts-ignore
+                let element_info = this.getElementInfoFor(atm_num);
+                // @ts-ignore
+                json_basis.push(getOneJsonBasis(element_info));
+            })
+        }
+        return json_basis;
     }
 
 }
