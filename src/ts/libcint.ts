@@ -58,7 +58,7 @@ class Libcint {
 
     private bas_template: TemplateBasis[][];
 
-    public env: Float64Array;
+    private env: Float64Array;
 
     constructor(atm: Int32Array, env: Float64Array, basis_index: number[], bas_template: TemplateBasis[][]) {
         this.atm = atm;

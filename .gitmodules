@@ -1,6 +1,12 @@
-[submodule "data/bse"]
-	path = data/bse
+[submodule "lib/basis_set_exchange"]
+	path = lib/basis_set_exchange
 	url = https://github.com/MolSSI-BSE/basis_set_exchange.git
-[submodule "data/Periodic-Table-JSON"]
-	path = data/Periodic-Table-JSON
+[submodule "lib/Periodic-Table-JSON"]
+	path = lib/Periodic-Table-JSON
 	url = https://github.com/Bowserinator/Periodic-Table-JSON.git
+[submodule "lib/libcint"]
+	path = lib/libcint
+	url = https://github.com/sunqm/libcint.git
+[submodule "lib/OpenBLAS"]
+	path = lib/OpenBLAS
+	url = https://github.com/OpenMathLib/OpenBLAS.git
