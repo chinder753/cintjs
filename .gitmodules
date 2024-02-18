@@ -7,6 +7,3 @@
 [submodule "lib/libcint"]
 	path = lib/libcint
 	url = https://github.com/sunqm/libcint.git
-[submodule "lib/OpenBLAS"]
-	path = lib/OpenBLAS
-	url = https://github.com/OpenMathLib/OpenBLAS.git
