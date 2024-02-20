@@ -1,8 +1,5 @@
-output_name = "libcint_hf"
-cint_func: str = "./hf.h"
-
-cm = f"emcc libcint.a -o {output_name}.cjs -sWASM=1 --emit-symbol-map -O3 -MODULARIZE=1 -sALLOW_MEMORY_GROWTH"
-
+output_name = "libcint"
+cint_func = "./hf.txt"
 
 other_func = ["malloc", "free"
     , "CINTlen_cart", "CINTlen_spinor"
@@ -21,18 +18,14 @@ other_func = ["malloc", "free"
 for i, x in enumerate(other_func):
     other_func[i] = f"_{x}"
 
-func_lines: list[str] = open(cint_func, encoding="utf-8").readlines()
-all_func = []
-for line in func_lines:
-    if line.find("extern CINTOptimizerFunction") == -1:
-        continue
-    line = line.split()[2].strip().strip(";")
-    all_func.append(f"_{line}"
-                    f",_{line.replace('optimizer', 'cart')}"
-                    f",_{line.replace('optimizer', 'sph')}"
-                    f",_{line.replace('optimizer', 'spinor')}")
+int_func = []
+for line in open(cint_func, encoding="utf-8").readlines():
+    line = line.strip()
+    int_func.append(f"_{line}_optimizer"+"\n"
+                    f"_{line}_cart"+"\n"
+                    f"_{line}_sph"+"\n"
+                    f"_{line}_spinor"+"\n")
 
-cm = f"{cm} -sEXPORTED_FUNCTIONS={','.join(other_func)},{','.join(all_func)}"
-print(cm)
-# import os
-# os.system(cm)
+cm = '\n'.join(other_func) + '\n' + ''.join(int_func)
+with open("func.txt", "w") as file:
+    file.write(cm)

@@ -1,8 +1,7 @@
-import { JsonBasis } from "./extype";
+import {JsonBasis} from "./extype";
 
 
-
-export { BSE };
+export {BSE};
 
 type ReturnJsonBasis<T extends string | Set<string>> = T extends string ? JsonBasis[] : JsonBasis[][];
 
@@ -18,7 +17,6 @@ type ElementInfo = {
     references: string[];
     electron_shells: ShellInfo[];
 }
-
 
 
 class BSE {
@@ -45,7 +43,7 @@ class BSE {
 
 
     public getJsonBasis<T extends string | Set<string>>(element_num: T): ReturnJsonBasis<T> {
-        function getOneJsonBasis(element_info: ElementInfo): JsonBasis[]{
+        function getOneJsonBasis(element_info: ElementInfo): JsonBasis[] {
             let json_basis: JsonBasis[] = [];
             element_info.electron_shells.forEach((shell_info: ShellInfo): void => {
                 json_basis.push({

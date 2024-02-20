@@ -1,20 +1,15 @@
-export { JsonBasis, AtomGroup, TemplateBasis };
+export {JsonBasis, AtomGroup};
 
-// type FixedLengthArray<
-//     T,
-//     N extends number,
-//     R extends Array<T> = []
-// > = R['length'] extends N ? R : FixedLengthArray<T, N, [T, ...R]>
+type TemplateShell = Int32Array[];
 
-type TemplateBasis = {
-    NPRIM_OF: number, NCTR_OF: number, KAPPA_OF: number, PTR_EXP: number, PTR_COEFF: number, angular_momentum: number[]
+interface JsonBasis {
+    KAPPA_OF: number,
+    angular_momentum: number[],
+    exponents: number[],
+    coefficients: number[][]
 }
 
-type JsonBasis = {
-    KAPPA_OF: number, angular_momentum: number[], exponents: number[], coefficients: number[][]
-}
-
-type AtomGroup = {
+interface AtomGroup {
     basis_index: number,
     CHARGE_OF: number,
     NUC_MOD_OF: number,
