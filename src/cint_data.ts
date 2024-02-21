@@ -53,10 +53,10 @@ const enum ENV_OFFSET {
 }
 
 class CintData {
-    private basis_index: number[];
-    private bas_template: Int32Array[];  // same as "coefficients" in BSE
-    private atm: Int32Array;
-    private env: Float64Array;
+    public basis_index: number[];
+    public bas_template: Int32Array[];  // same as "coefficients" in BSE
+    public atm: Int32Array;
+    public env: Float64Array;
 
     constructor(atm: Int32Array, env: Float64Array, basis_index: number[], bas_template: Int32Array[]) {
         this.atm = atm;
