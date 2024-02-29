@@ -1,9 +1,9 @@
-export {CintData}
+export { CintData };
 
-import {AtomGroup, JsonBasis} from "./extype";
+import { AtomGroup, JsonBasis } from "./extype";
 
 
-const enum ENV_GLOBAL_PARAMETERS {
+export const enum ENV_GLOBAL_PARAMETERS{
     // global parameters in env
     // Overall cutoff for integral prescreening, value needs to be ~ln(threshold)
     PTR_EXPCUTOFF = 0,
@@ -26,7 +26,7 @@ const enum ENV_GLOBAL_PARAMETERS {
     PTR_ENV_START = 20
 }
 
-const enum ATM_SOLT {
+export const enum ATM_SOLT{
     CHARGE_OF,
     PTR_COORD,
     NUC_MOD_OF,
@@ -36,7 +36,7 @@ const enum ATM_SOLT {
     ATM_SLOTS
 }
 
-const enum BAS_SOLT {
+export const enum BAS_SOLT{
     ATOM_OF,
     ANG_OF,
     NPRIM_OF,
@@ -48,99 +48,99 @@ const enum BAS_SOLT {
     BAS_SLOTS
 }
 
-const enum ENV_OFFSET {
+export const enum ENV_OFFSET{
     ATM = 4
 }
 
-class CintData {
+class CintData{
     public basis_index: number[];
     public bas_template: Int32Array[];  // same as "coefficients" in BSE
     public atm: Int32Array;
     public env: Float64Array;
 
-    constructor(atm: Int32Array, env: Float64Array, basis_index: number[], bas_template: Int32Array[]) {
+    // ENV_GLOBAL_PARAMETERS
+    get PTR_EXPCUTOFF(): number{
+        return this.env[ENV_GLOBAL_PARAMETERS.PTR_ENV_START];
+    }
+
+    set PTR_EXPCUTOFF(PTR_EXPCUTOFF: number){
+        this.env[ENV_GLOBAL_PARAMETERS.PTR_ENV_START] = PTR_EXPCUTOFF;
+    }
+
+    get PTR_COMMON_ORIG(): Float64Array{
+        return this.env.slice(ENV_GLOBAL_PARAMETERS.PTR_COMMON_ORIG, ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG);
+    }
+
+    set PTR_COMMON_ORIG(PTR_COMMON_ORIG: number[]){
+        if(PTR_COMMON_ORIG.length != ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG - ENV_GLOBAL_PARAMETERS.PTR_COMMON_ORIG)
+            this.env.set(PTR_COMMON_ORIG, ENV_GLOBAL_PARAMETERS.PTR_COMMON_ORIG);
+    }
+
+    get PTR_RINV_ORIG(): Float64Array{
+        return this.env.slice(ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG, ENV_GLOBAL_PARAMETERS.PTR_RINV_ZETA);
+    }
+
+    set PTR_RINV_ORIG(PTR_RINV_ORIG: number[]){
+        this.env.set(PTR_RINV_ORIG, ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG);
+    }
+
+    get PTR_RINV_ZETA(): number{
+        return this.env[ENV_GLOBAL_PARAMETERS.PTR_RINV_ZETA];
+    }
+
+    set PTR_RINV_ZETA(PTR_RINV_ZETA: number){
+        this.env[ENV_GLOBAL_PARAMETERS.PTR_RINV_ZETA] = PTR_RINV_ZETA;
+    }
+
+    get PTR_RANGE_OMEGA(): number{
+        return this.env[ENV_GLOBAL_PARAMETERS.PTR_RANGE_OMEGA];
+    }
+
+    set PTR_RANGE_OMEGA(PTR_RANGE_OMEGA: number){
+        this.env[ENV_GLOBAL_PARAMETERS.PTR_RANGE_OMEGA] = PTR_RANGE_OMEGA;
+    }
+
+    get PTR_F12_ZETA(): number{
+        return this.env[ENV_GLOBAL_PARAMETERS.PTR_F12_ZETA];
+    }
+
+    set PTR_F12_ZETA(PTR_F12_ZETA: number){
+        this.env[ENV_GLOBAL_PARAMETERS.PTR_F12_ZETA] = PTR_F12_ZETA;
+    }
+
+    get PTR_GTG_ZETA(){
+        return this.env[ENV_GLOBAL_PARAMETERS.PTR_GTG_ZETA];
+    }
+
+    set PTR_GTG_ZETA(PTR_GTG_ZETA: number){
+        this.env[ENV_GLOBAL_PARAMETERS.PTR_GTG_ZETA] = PTR_GTG_ZETA;
+    }
+
+    get NGRIDS(): number{
+        return this.env[ENV_GLOBAL_PARAMETERS.NGRIDS];
+    }
+
+    set NGRIDS(NGRIDS: number){
+        this.env[ENV_GLOBAL_PARAMETERS.NGRIDS] = NGRIDS;
+    }
+
+    get PTR_GRIDS(): Float64Array{
+        return this.env.slice(ENV_GLOBAL_PARAMETERS.PTR_GRIDS, ENV_GLOBAL_PARAMETERS.PTR_ENV_START);
+    }
+
+    set PTR_GRIDS(PTR_GRIDS: number[]){
+        if(PTR_GRIDS.length != ENV_GLOBAL_PARAMETERS.PTR_GRIDS - ENV_GLOBAL_PARAMETERS.PTR_ENV_START)
+            this.env.set(PTR_GRIDS, ENV_GLOBAL_PARAMETERS.PTR_GRIDS);
+    }
+
+    constructor(atm: Int32Array, env: Float64Array, basis_index: number[], bas_template: Int32Array[]){
         this.atm = atm;
         this.env = env;
         this.basis_index = basis_index;
         this.bas_template = bas_template;
     }
 
-    // ENV_GLOBAL_PARAMETERS
-    get PTR_EXPCUTOFF(): number {
-        return this.env[ENV_GLOBAL_PARAMETERS.PTR_ENV_START];
-    }
-
-    set PTR_EXPCUTOFF(PTR_EXPCUTOFF: number) {
-        this.env[ENV_GLOBAL_PARAMETERS.PTR_ENV_START] = PTR_EXPCUTOFF;
-    }
-
-    get PTR_COMMON_ORIG(): Float64Array {
-        return this.env.slice(ENV_GLOBAL_PARAMETERS.PTR_COMMON_ORIG, ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG);
-    }
-
-    set PTR_COMMON_ORIG(PTR_COMMON_ORIG: number[]) {
-        if (PTR_COMMON_ORIG.length != ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG - ENV_GLOBAL_PARAMETERS.PTR_COMMON_ORIG)
-            this.env.set(PTR_COMMON_ORIG, ENV_GLOBAL_PARAMETERS.PTR_COMMON_ORIG);
-    }
-
-    get PTR_RINV_ORIG(): Float64Array {
-        return this.env.slice(ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG, ENV_GLOBAL_PARAMETERS.PTR_RINV_ZETA);
-    }
-
-    set PTR_RINV_ORIG(PTR_RINV_ORIG: number[]) {
-        this.env.set(PTR_RINV_ORIG, ENV_GLOBAL_PARAMETERS.PTR_RINV_ORIG);
-    }
-
-    get PTR_RINV_ZETA(): number {
-        return this.env[ENV_GLOBAL_PARAMETERS.PTR_RINV_ZETA];
-    }
-
-    set PTR_RINV_ZETA(PTR_RINV_ZETA: number) {
-        this.env[ENV_GLOBAL_PARAMETERS.PTR_RINV_ZETA] = PTR_RINV_ZETA;
-    }
-
-    get PTR_RANGE_OMEGA(): number {
-        return this.env[ENV_GLOBAL_PARAMETERS.PTR_RANGE_OMEGA];
-    }
-
-    set PTR_RANGE_OMEGA(PTR_RANGE_OMEGA: number) {
-        this.env[ENV_GLOBAL_PARAMETERS.PTR_RANGE_OMEGA] = PTR_RANGE_OMEGA;
-    }
-
-    get PTR_F12_ZETA(): number {
-        return this.env[ENV_GLOBAL_PARAMETERS.PTR_F12_ZETA];
-    }
-
-    set PTR_F12_ZETA(PTR_F12_ZETA: number) {
-        this.env[ENV_GLOBAL_PARAMETERS.PTR_F12_ZETA] = PTR_F12_ZETA;
-    }
-
-    get PTR_GTG_ZETA() {
-        return this.env[ENV_GLOBAL_PARAMETERS.PTR_GTG_ZETA];
-    }
-
-    set PTR_GTG_ZETA(PTR_GTG_ZETA: number) {
-        this.env[ENV_GLOBAL_PARAMETERS.PTR_GTG_ZETA] = PTR_GTG_ZETA;
-    }
-
-    get NGRIDS(): number {
-        return this.env[ENV_GLOBAL_PARAMETERS.NGRIDS];
-    }
-
-    set NGRIDS(NGRIDS: number) {
-        this.env[ENV_GLOBAL_PARAMETERS.NGRIDS] = NGRIDS;
-    }
-
-    get PTR_GRIDS(): Float64Array {
-        return this.env.slice(ENV_GLOBAL_PARAMETERS.PTR_GRIDS, ENV_GLOBAL_PARAMETERS.PTR_ENV_START);
-    }
-
-    set PTR_GRIDS(PTR_GRIDS: number[]) {
-        if (PTR_GRIDS.length != ENV_GLOBAL_PARAMETERS.PTR_GRIDS - ENV_GLOBAL_PARAMETERS.PTR_ENV_START)
-            this.env.set(PTR_GRIDS, ENV_GLOBAL_PARAMETERS.PTR_GRIDS);
-    }
-
-    public static fromGroup(groups: AtomGroup[], basis: JsonBasis[][]) {
+    public static fromGroup(groups: AtomGroup[], basis: JsonBasis[][]){
         let natm = 0, nbas = 0, nbaspar = 0
             , atm_offset = 0, env_offset = ENV_GLOBAL_PARAMETERS.PTR_ENV_START
             , basis_index = new Array<number>()
@@ -194,7 +194,7 @@ class CintData {
                         0                       // ATOM_OF
                         , ang                   // ANG_OF
                         , exp_len               // NPRIM_OF
-                        , coeff_len             // NCTR_OF
+                        , 1                     // NCTR_OF
                         , json_basis.KAPPA_OF   // KAPPA_OF
                         , ptr_exp               // PTR_EXP
                         , env_offset            // PTR_COEFF
@@ -203,7 +203,7 @@ class CintData {
                     // coefficients
                     env.set(json_basis.coefficients[i], env_offset);
                     env_offset += exp_len;
-                })
+                });
             });
             bas_template.push(new Int32Array(temp_bas_template));
         });
@@ -211,17 +211,17 @@ class CintData {
         return new CintData(atm, env, basis_index, bas_template);
     }
 
-    public atm_coor(atm_i: number) {
+    public atm_coor(atm_i: number){
         let begin = ENV_GLOBAL_PARAMETERS.PTR_ENV_START + atm_i * ENV_OFFSET.ATM
             , end = begin + ENV_OFFSET.ATM;
         return this.env.subarray(begin, end);
     }
 
-    public get_bas(bas_i: number) {
-        return this.bas_template[bas_i]
+    public get_bas(bas_i: number){
+        return this.bas_template[bas_i];
     }
 
-    public get_atm_bas(atm_i: number): Int32Array {
+    public get_atm_bas(atm_i: number): Int32Array{
         return this.bas_template[this.basis_index[atm_i]];
     }
 

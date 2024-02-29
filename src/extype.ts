@@ -1,15 +1,15 @@
-export {JsonBasis, AtomGroup};
+export { JsonBasis, AtomGroup };
 
 type TemplateShell = Int32Array[];
 
-interface JsonBasis {
+interface JsonBasis{
     KAPPA_OF: number,
     angular_momentum: number[],
     exponents: number[],
     coefficients: number[][]
 }
 
-interface AtomGroup {
+interface AtomGroup{
     basis_index: number,
     CHARGE_OF: number,
     NUC_MOD_OF: number,

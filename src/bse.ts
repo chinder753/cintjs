@@ -1,7 +1,7 @@
-import {JsonBasis} from "./extype";
+import { JsonBasis } from "./extype";
 
 
-export {BSE};
+export { BSE };
 
 type ReturnJsonBasis<T extends string | Set<string>> = T extends string ? JsonBasis[] : JsonBasis[][];
 
@@ -19,7 +19,7 @@ type ElementInfo = {
 }
 
 
-class BSE {
+class BSE{
     private molssi_bse_schema: {
         schema_type: string;
         schema_version: string;
@@ -28,7 +28,7 @@ class BSE {
     private data_source: string;
     private elements: Map<string, ElementInfo>;
 
-    constructor(json_text: string) {
+    constructor(json_text: string){
         let basis = <BSE>JSON.parse(json_text);
         this.molssi_bse_schema = basis.molssi_bse_schema;
         this.description = basis.description;
@@ -36,14 +36,14 @@ class BSE {
         this.elements = new Map(Object.entries(basis.elements));
     }
 
-    public getElementInfoFor(element: string): ElementInfo {
-        if (!this.elements.has(element)) throw `没有${element}号元素的基组`;
+    public getElementInfoFor(element: string): ElementInfo{
+        if(!this.elements.has(element)) throw `没有${element}号元素的基组`;
         return <ElementInfo>this.elements.get(element);
     }
 
 
-    public getJsonBasis<T extends string | Set<string>>(element_num: T): ReturnJsonBasis<T> {
-        function getOneJsonBasis(element_info: ElementInfo): JsonBasis[] {
+    public getJsonBasis<T extends string | Set<string>>(element_num: T): ReturnJsonBasis<T>{
+        function getOneJsonBasis(element_info: ElementInfo): JsonBasis[]{
             let json_basis: JsonBasis[] = [];
             element_info.electron_shells.forEach((shell_info: ShellInfo): void => {
                 json_basis.push({
@@ -58,17 +58,17 @@ class BSE {
 
         let json_basis: ReturnJsonBasis<T> = [];
 
-        if (typeof element_num == "string") {
+        if(typeof element_num == "string"){
             let element_info = this.getElementInfoFor(element_num);
             // @ts-ignore
             json_basis = getOneJsonBasis(element_info);
-        } else {
+        }else{
             element_num.forEach((atm_num: string) => {
                 // @ts-ignore
                 let element_info = this.getElementInfoFor(atm_num);
                 // @ts-ignore
                 json_basis.push(getOneJsonBasis(element_info));
-            })
+            });
         }
         return json_basis;
     }
