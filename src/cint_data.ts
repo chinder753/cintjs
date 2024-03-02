@@ -53,10 +53,76 @@ export const enum ENV_OFFSET{
 }
 
 class CintData{
-    public basis_index: number[];
-    public bas_template: Int32Array[];  // same as "coefficients" in BSE
-    public atm: Int32Array;
-    public env: Float64Array;
+    public static fromGroup(groups: AtomGroup[], basis: JsonBasis[][]){
+        let natm = 0, nbas = 0, nbaspar = 0
+            , atm_offset = 0, env_offset = ENV_GLOBAL_PARAMETERS.PTR_ENV_START
+            , basis_index = new Array<number>()
+            , bas_template: Int32Array[] = [];
+        // natm
+        groups.forEach((atom_group: AtomGroup) => {
+            natm += atom_group.coordinates.length;
+        });
+        // basis parameter length in env
+        basis.forEach((ele_basis: JsonBasis[]) => {
+            ele_basis.forEach((json_basis: JsonBasis) => {
+                nbaspar += json_basis.exponents.length * (json_basis.coefficients.length + 1);
+            });
+        });
+        //
+        let env: Float64Array = new Float64Array(ENV_GLOBAL_PARAMETERS.PTR_ENV_START + natm * ENV_OFFSET.ATM + nbaspar)
+            , atm: Int32Array = new Int32Array(natm * ATM_SOLT.ATM_SLOTS);
+        // atom
+        groups.forEach((atom_group: AtomGroup) => {
+            atom_group.coordinates.forEach((coor) => {
+                // atm
+                atm[atm_offset + ATM_SOLT.CHARGE_OF] = atom_group.CHARGE_OF;
+                atm[atm_offset + ATM_SOLT.PTR_COORD] = env_offset;
+                atm[atm_offset + ATM_SOLT.NUC_MOD_OF] = atom_group.NUC_MOD_OF;
+                atm[atm_offset + ATM_SOLT.PTR_ZETA] = env_offset + 3;
+                // atom coordinates
+                env.set(coor, env_offset);  // coordinates
+                env[env_offset + 3] = atom_group.zeta;  // zeta
+                //
+                basis_index.push(atom_group.basis_index);
+                //
+                atm_offset += ATM_SOLT.ATM_SLOTS;
+                env_offset += ENV_OFFSET.ATM;
+            });
+        });
+        // basis parameter
+        basis.forEach((ele_basis: JsonBasis[]) => {
+            // basis parameter
+            let temp_bas_template: number[] = [];
+            ele_basis.forEach((json_basis) => {
+                let ptr_exp = env_offset
+                    , exp_len = json_basis.exponents.length
+                    , coeff_len = json_basis.coefficients.length;
+                // exponents
+                env.set(json_basis.exponents, ptr_exp);
+                env_offset += exp_len;
+                //
+                json_basis.angular_momentum.forEach((ang, i) => {
+                    // basis template
+                    temp_bas_template.push(
+                        0                       // ATOM_OF
+                        , ang                   // ANG_OF
+                        , exp_len               // NPRIM_OF
+                        , 1                     // NCTR_OF
+                        , json_basis.KAPPA_OF   // KAPPA_OF
+                        , ptr_exp               // PTR_EXP
+                        , env_offset            // PTR_COEFF
+                        , 0                     // RESERVE_BASLOT
+                    );
+                    // coefficients
+                    env.set(json_basis.coefficients[i], env_offset);
+                    env_offset += exp_len;
+                });
+            });
+            bas_template.push(new Int32Array(temp_bas_template));
+        });
+
+        return new CintData(atm, env, basis_index, bas_template);
+    }
 
     // ENV_GLOBAL_PARAMETERS
     get PTR_EXPCUTOFF(): number{
@@ -140,76 +206,10 @@ class CintData{
         this.bas_template = bas_template;
     }
 
-    public static fromGroup(groups: AtomGroup[], basis: JsonBasis[][]){
-        let natm = 0, nbas = 0, nbaspar = 0
-            , atm_offset = 0, env_offset = ENV_GLOBAL_PARAMETERS.PTR_ENV_START
-            , basis_index = new Array<number>()
-            , bas_template: Int32Array[] = [];
-        // natm
-        groups.forEach((atom_group: AtomGroup) => {
-            natm += atom_group.coordinates.length;
-        });
-        // basis parameter length in env
-        basis.forEach((ele_basis: JsonBasis[]) => {
-            ele_basis.forEach((json_basis: JsonBasis) => {
-                nbaspar += json_basis.exponents.length * (json_basis.coefficients.length + 1);
-            });
-        });
-        //
-        let env: Float64Array = new Float64Array(ENV_GLOBAL_PARAMETERS.PTR_ENV_START + natm * ENV_OFFSET.ATM + nbaspar)
-            , atm: Int32Array = new Int32Array(natm * ATM_SOLT.ATM_SLOTS);
-        // atom
-        groups.forEach((atom_group: AtomGroup) => {
-            atom_group.coordinates.forEach((coor) => {
-                // atm
-                atm[atm_offset + ATM_SOLT.CHARGE_OF] = atom_group.CHARGE_OF;
-                atm[atm_offset + ATM_SOLT.PTR_COORD] = env_offset;
-                atm[atm_offset + ATM_SOLT.NUC_MOD_OF] = atom_group.NUC_MOD_OF;
-                atm[atm_offset + ATM_SOLT.PTR_ZETA] = env_offset + 3;
-                // atom coordinates
-                env.set(coor, env_offset);  // coordinates
-                env[env_offset + 3] = atom_group.zeta;  // zeta
-                //
-                basis_index.push(atom_group.basis_index);
-                //
-                atm_offset += ATM_SOLT.ATM_SLOTS;
-                env_offset += ENV_OFFSET.ATM;
-            });
-        });
-        // basis parameter
-        basis.forEach((ele_basis: JsonBasis[]) => {
-            // basis parameter
-            let temp_bas_template: number[] = [];
-            ele_basis.forEach((json_basis) => {
-                let ptr_exp = env_offset
-                    , exp_len = json_basis.exponents.length
-                    , coeff_len = json_basis.coefficients.length;
-                // exponents
-                env.set(json_basis.exponents, ptr_exp);
-                env_offset += exp_len;
-                //
-                json_basis.angular_momentum.forEach((ang, i) => {
-                    // basis template
-                    temp_bas_template.push(
-                        0                       // ATOM_OF
-                        , ang                   // ANG_OF
-                        , exp_len               // NPRIM_OF
-                        , 1                     // NCTR_OF
-                        , json_basis.KAPPA_OF   // KAPPA_OF
-                        , ptr_exp               // PTR_EXP
-                        , env_offset            // PTR_COEFF
-                        , 0                     // RESERVE_BASLOT
-                    );
-                    // coefficients
-                    env.set(json_basis.coefficients[i], env_offset);
-                    env_offset += exp_len;
-                });
-            });
-            bas_template.push(new Int32Array(temp_bas_template));
-        });
-
-        return new CintData(atm, env, basis_index, bas_template);
-    }
+    public basis_index: number[];
+    public bas_template: Int32Array[];  // same as "coefficients" in BSE
+    public atm: Int32Array;
+    public env: Float64Array;
 
     public atm_coor(atm_i: number){
         let begin = ENV_GLOBAL_PARAMETERS.PTR_ENV_START + atm_i * ENV_OFFSET.ATM

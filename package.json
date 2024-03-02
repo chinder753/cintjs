@@ -7,8 +7,9 @@
   "main": "test.js",
   "devDependencies": {},
   "scripts": {
-    "test": "node dist/test.js",
-    "build": "tsc && cp -r src/wasm dist/ && node dist/test.js"
+    "prebuild": "bash tools/init.sh && bash tools/cint_wasm.sh",
+    "build": "tsc --project src/tsconfig.json && cp lib/libcint/build/libcint.wasm dist/libcint",
+    "postbuild": "tsc --project src/test/tsconfig.json && node ./dist/test/H2O.js"
   },
   "author": "",
   "license": "ISC",

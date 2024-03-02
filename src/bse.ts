@@ -20,14 +20,6 @@ type ElementInfo = {
 
 
 class BSE{
-    private molssi_bse_schema: {
-        schema_type: string;
-        schema_version: string;
-    };
-    private description: string;
-    private data_source: string;
-    private elements: Map<string, ElementInfo>;
-
     constructor(json_text: string){
         let basis = <BSE>JSON.parse(json_text);
         this.molssi_bse_schema = basis.molssi_bse_schema;
@@ -35,6 +27,14 @@ class BSE{
         this.data_source = basis.data_source;
         this.elements = new Map(Object.entries(basis.elements));
     }
+
+    private molssi_bse_schema: {
+        schema_type: string;
+        schema_version: string;
+    };
+    private description: string;
+    private data_source: string;
+    private elements: Map<string, ElementInfo>;
 
     public getElementInfoFor(element: string): ElementInfo{
         if(!this.elements.has(element)) throw `没有${element}号元素的基组`;

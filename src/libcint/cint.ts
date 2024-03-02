@@ -1,16 +1,7 @@
+// @ts-ignore
 import cint_wasm from "./libcint.mjs";
+
 import { ATM_SOLT, BAS_SOLT, CintData } from "../cint_data.js";
-
-
-// type CINTIntegralFunction = (out: number, dims: number, shls: number,
-//                              atm: number, natm: number, bas: number, nbas: number, env: number,
-//                              opt: number, cache: number) => number;
-//
-// interface Libcint{
-//     _malloc: (size: number) => number;
-//     _int1e_ovlp_cart: CINTIntegralFunction;
-//
-// }
 
 type TypedArray =
     Int8Array
@@ -24,29 +15,36 @@ type TypedArray =
 
 async function ready(){
     let cint: any;
-    await cint_wasm().then(cint_t => cint = cint_t);
+    await cint_wasm().then<any, never>((cint_t: any) => cint = cint_t);
 
     // const CLASS_REGISTER = new FinalizationRegistry((v: WeakRef<any>) => v.deref().delete());
     // const ARRAY_REGISTER = new FinalizationRegistry(p => Cint._cint._free(p));
 
     class IntegerCalculator{
-        readonly natm: number;
-        readonly nbas: number;
-        readonly buf: Float64Array;
-        private p_atm: number;
-        private p_bas: number;
-        private p_env: number;
-        private di: number[] = [];
-        private shls: Int32Array;
+        private _di: number[] = [];
+
+        get di(){
+            return this._di.map(x => x);
+        }
+
+        get index(){
+            let i = 0
+                , int_index: number[] = [];
+            this._di.forEach(x => {
+                int_index.push(i);
+                i += x;
+            });
+            return int_index;
+        }
 
         constructor(p_atm: number, natm: number
             , bas_p: number, nbas: number
             , p_env: number){
             for(let i = 0; i < nbas; i++){
-                this.di.push(Cint._cint._CINTcgto_cart(i, bas_p));
+                this._di.push(Cint._cint._CINTcgto_cart(i, bas_p));
             }
             let shls_p = cint._malloc(4 * Int32Array.BYTES_PER_ELEMENT)
-                , max_di = Math.max(...this.di)
+                , max_di = Math.max(...this._di)
                 , buf_len = max_di * max_di * max_di * max_di
                 , buf_p = cint._malloc(buf_len * Float64Array.BYTES_PER_ELEMENT);
             this.p_atm = p_atm;
@@ -59,16 +57,64 @@ async function ready(){
             // CLASS_REGISTER.register(this, new WeakRef(this));
         }
 
-        public intor(shls: number[], inte: string){
+        readonly natm: number;
+        readonly nbas: number;
+        readonly buf: Float64Array;
+        private p_atm: number;
+        private p_bas: number;
+        private p_env: number;
+        private shls: Int32Array;
+
+        public intor(shls: number[], int_name: string){
             if(shls.length > 4 || shls.length < 2) throw "";
-            shls.forEach((v, i) => this.shls[i] = v);
-            cint[inte](this.buf.byteOffset, 0, this.shls.byteOffset
+            this.shls.set(shls);
+            cint[int_name](this.buf.byteOffset, 0, this.shls.byteOffset
                 , this.p_atm, this.natm
                 , this.p_bas, this.nbas
                 , this.p_env);
             let out_dim = 1;
-            shls.forEach(v => out_dim *= this.di[v]);
+            shls.forEach(v => out_dim *= this._di[v]);
             return new Float64Array(this.buf.subarray(0, out_dim));
+        }
+
+        public int2c_full(int_name: string): { dim: number, storage: "full", data: Float64Array }{
+            let int_index = this.index
+                , di = this.di
+                , data_dim = di.reduce((p, c) => p + c)
+                , data = new Float64Array(data_dim * data_dim);
+            for(let i = 0; i < this.nbas; i++){
+                for(let j = 0; j <= i; j++){
+                    let subdata = this.intor([i, j], int_name);
+                    for(let m = 0; m < di[i]; m++){
+                        for(let n = 0; n < di[j]; n++){
+                            data[data_dim * (int_index[i] + m) + int_index[j] + n] = subdata[di[j] * m + n];
+                        }
+                    }
+                }
+            }
+            for(let i = 0; i < data_dim; i++){
+                for(let j = 0; j < data_dim; j++){
+                    data[data_dim * i + j] = data[data_dim * j + i];
+                }
+            }
+            return {dim: data_dim, storage: "full", data: data};
+        }
+
+        public int2c_pack(int_name: string): { dim: number, storage: "pack", data: Float64Array }{
+            let int_index = this.index
+                , di = this.di
+                , data_dim = di.reduce((p, c) => p + c)
+                , data = new Float64Array(data_dim * (data_dim + 1) / 2);
+            for(let j = 0; j < this.nbas; j++){
+                for(let i = 0; i <= j; i++){
+                    let subdata = this.intor([j, i], int_name);
+                    for(let n = 0; n < di[j]; n++){
+                        let index_j = int_index[j] + n;
+                        data.set(subdata.subarray(di[i] * n, di[i] * (n + 1)), index_j * (index_j + 1) / 2 + int_index[i]);
+                    }
+                }
+            }
+            return {dim: data_dim, storage: "pack", data: data};
         }
 
         public delete(){
@@ -79,22 +125,6 @@ async function ready(){
 
     class Cint{
         static readonly _cint = cint;
-        private atm: Int32Array;
-        private natm: number;
-        private basis_index: number[];
-        private bas_template: Int32Array[] = [];  // same as "coefficients" in BSE
-        private env: Float64Array;
-
-        constructor(basis_index: number[], bas_template: Int32Array[], atm: Int32Array, env: Float64Array){
-            this.basis_index = basis_index;
-            bas_template.forEach(bas => {
-                this.bas_template.push(Cint.moveToHeap(bas));
-            });
-            this.atm = Cint.moveToHeap(atm);
-            this.natm = this.atm.length / ATM_SOLT.ATM_SLOTS;
-            this.env = Cint.moveToHeap(env);
-            // CINT_REGISTER.register(this, new WeakRef(this));
-        }
 
         public static malloc(len: number, bytes_per_element: number): number{
             return this._cint._malloc(len * bytes_per_element) / bytes_per_element;
@@ -145,6 +175,23 @@ async function ready(){
         public static fromCintData(cint_data: CintData){
             return new Cint(cint_data.basis_index, cint_data.bas_template, cint_data.atm, cint_data.env);
         }
+
+        constructor(basis_index: number[], bas_template: Int32Array[], atm: Int32Array, env: Float64Array){
+            this.basis_index = basis_index;
+            bas_template.forEach(bas => {
+                this.bas_template.push(Cint.moveToHeap(bas));
+            });
+            this.atm = Cint.moveToHeap(atm);
+            this.natm = this.atm.length / ATM_SOLT.ATM_SLOTS;
+            this.env = Cint.moveToHeap(env);
+            // CINT_REGISTER.register(this, new WeakRef(this));
+        }
+
+        private atm: Int32Array;
+        private natm: number;
+        private basis_index: number[];
+        private bas_template: Int32Array[] = [];  // same as "coefficients" in BSE
+        private env: Float64Array;
 
         public delete(){
             this.bas_template.forEach(bas => {

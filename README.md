@@ -25,7 +25,7 @@ emcc libcint.a -o libcint.mjs --emit-symbol-map -O3 -MODULARIZE=1 -sALLOW_MEMORY
 
 cd ../../../
 npm install
-cp lib/libcint/build/libcint.mjs src/wasm
+cp lib/libcint/build/libcint.mjs src/libcint
 tsc
-cp lib/libcint/build/libcint.wasm dist/wasm
+cp lib/libcint/build/libcint.wasm dist/libcint
 ```
