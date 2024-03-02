@@ -1,3 +1,9 @@
+```
+npm run build
+```
+
+or
+
 ```bash
 git submodule init
 git submodule update

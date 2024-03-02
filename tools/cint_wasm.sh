@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd lib/libcint
 mkdir build
 cd build

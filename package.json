@@ -2,14 +2,13 @@
   "dependencies": {
     "@types/node": "^20.10.4"
   },
-  "name": "ts",
+  "name": "cint.js",
   "version": "1.0.0",
-  "main": "test.js",
   "devDependencies": {},
   "scripts": {
-    "prebuild": "bash tools/init.sh && bash tools/cint_wasm.sh",
+    "prebuild": "bash tools/init.sh func_hf.txt && bash tools/cint_wasm.sh",
     "build": "tsc --project src/tsconfig.json && cp lib/libcint/build/libcint.wasm dist/libcint",
-    "postbuild": "tsc --project src/test/tsconfig.json && node ./dist/test/H2O.js"
+    "postbuild": "node ./dist/test/H2O.js"
   },
   "author": "",
   "license": "ISC",
