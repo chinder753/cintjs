@@ -1,4 +1,5 @@
-export interface Num<T, Self>{
+export {Num}
+interface Num<T, Self>{
 
     value: T;
 
@@ -17,6 +18,8 @@ export interface Num<T, Self>{
     div(other: Self): Self;
 
     divSelf(other: Self): this;
+
+    toString(): string;
 
     get neg(): Self;
 

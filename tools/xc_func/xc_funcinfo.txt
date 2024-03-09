@@ -1,0 +1,16 @@
+xc_func_info_get_number
+xc_func_info_get_name
+xc_func_info_get_flags
+
+xc_func_info_get_n_ext_params
+xc_func_info_get_ext_params_description
+
+xc_functional_get_number
+xc_functional_get_name
+xc_family_from_id
+
+xc_number_of_functionals
+xc_maximum_name_length
+xc_available_functional_numbers
+xc_available_functional_numbers_by_name
+xc_available_functional_names

@@ -1,5 +1,7 @@
 import { Num } from "./num";
 
+export {Complex}
+
 type complex = [number, number];  // [real, imag]
 
 class Complex implements Num<complex, Complex>{
@@ -78,6 +80,10 @@ class Complex implements Num<complex, Complex>{
         this.value[0] -= this.value[0];
         this.value[1] -= this.value[1];
         return this;
+    }
+
+    toString(): string{
+        return `${this.value[0]}${this.value[1]>0 ? "+" : ""}${this.value[1]}i`;
     }
 
 }

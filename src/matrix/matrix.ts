@@ -10,35 +10,38 @@
 // type TypedArray = IntArray | UintArray | FloatArray;
 // type TypedArrayConstructor = IntArrayConstructor | UintArrayConstructor | FloatArrayConstructor
 
-import { Num } from "../num/num";
+import { Num } from "../num/num.js";
 
-abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, any>, Self extends Matrix<any, any, any>>{
-    // @ts-ignore
-    public static zero(shape: [number, number]): Matrix{
+export {Matrix}
+
+abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, any>, Self extends Matrix<Storage, Ele, Self>>{
+    public static zero<Self extends Matrix<any, any, Self>>(shape: [number, number]): Self{
+        throw "";
     }
 
-    // public static identity(rank: number): Matrix{
-    //     let a = Matrix.zero([rank, rank]);
-    //     for(let i = 0; i < rank; i++){
-    //         a.set(i, i, 1);
-    //     }
-    //     return a;
-    // }
+    public static identity<Self extends Matrix<any, any, Self>>(rank: number): Self{
+        let a = this.zero<Self>([rank, rank]);
+        for(let i = 0; i < rank; i++){
+            a.set(i, i, 1);
+        }
+        return a;
+    }
 
-    // public static fromArray(array: number[][]): Matrix{
-    //     let shape: [number, number] = [array.length, array[0].length];
-    //     let a = Matrix.zero(shape);
-    //     for(let i = 0; i < shape[0]; i++){
-    //         for(let j = 0; j < shape[1]; j++){
-    //             a.set(i, j, array[i][j]);
-    //         }
-    //     }
-    // }
+    public static fromArray<Ele extends Num<any, any>, Self extends Matrix<any, Ele, Self>>(array: Ele[][]): Self{
+        let shape: [number, number] = [array.length, array[0].length];
+        let a = this.zero<Self>(shape);
+        for(let i = 0; i < shape[0]; i++){
+            for(let j = 0; j < shape[1]; j++){
+                a.set(i, j, array[i][j]);
+            }
+        }
+        return a;
+    }
 
     abstract get copy(): Self;
 
     get transpose(): Self{
-        let c = this.copy;
+        let c = Object.getPrototypeOf(this).zero([this.shape[1], this.shape[0]]);
         for(let m = 0; m < this.shape[0]; m++){
             for(let n = 0; n < this.shape[1]; n++){
                 c.set(n, m, this.get(m, n));
@@ -60,7 +63,16 @@ abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, a
 
     abstract set(i: number, j: number, value: Ele): void;
 
-    abstract print(comment: string): void;
+    print(comment: string = ""): void{
+        console.log(comment);
+        for(let i=0; i<this.shape[0]; i++){
+            let line = "";
+            for(let j=0; j<this.shape[1]; j++){
+                line += this.get(i, j).toString();
+            }
+            console.log(line);
+        }
+    };
 
     public add(b: Ele): Self{
         return this.copy.addSelf(b);
@@ -80,9 +92,10 @@ abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, a
     }
 
     public matAddSelf(b: Self): this{
+        if(this.shape[0] != b.shape[0] && this.shape[1] != b.shape[1]) throw "";
         for(let m = 0; m < this.shape[0]; m++){
             for(let n = 0; n < this.shape[0]; n++){
-                this.set(m, n, this.get(m, n) + b.get(m, n));
+                this.set(m, n, this.get(m, n).addSelf(b.get(m, n)));
             }
         }
         return this;
@@ -103,11 +116,11 @@ abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, a
 
     public matMul(b: Self): Self{
         if(this.shape[1] != b.shape[0]) throw "";
-        let c = Matrix.zero([this.shape[0], b.shape[1]]);
+        let c = Object.getPrototypeOf(this).zero([this.shape[0], b.shape[1]]) as Self;
         for(let m = 0; m < this.shape[0]; m++){
             for(let n = 0; n < b.shape[1]; n++){
                 for(let k = 0; k < this.shape[1]; k++){
-                    c.set(m, n, c.get(m, n) + this.get(m, k).mulSelf(b.get(k, n)));
+                    c.set(m, n, c.get(m, n).addSelf(this.get(m, k).mulSelf(b.get(k, n))));
                 }
             }
         }
@@ -116,7 +129,7 @@ abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, a
 
     // (m*i, n*j) = (m, n) \otimes (i, j)
     public kron(b: Self): Self{
-        let c = Matrix.zero([this.shape[0] * b.shape[0], this.shape[1] * b.shape[1]]);
+        let c = Object.getPrototypeOf(this).zero([this.shape[0] * b.shape[0], this.shape[1] * b.shape[1]]) as Self;
         for(let x = 0; x < c.shape[0]; x++){
             let m = Math.floor(x / b.shape[0]), i = x % b.shape[0];
             for(let y = 0; y < c.shape[1]; y++){
@@ -128,10 +141,20 @@ abstract class Matrix<Storage extends { length: number }, Ele extends Num<any, a
     }
 
     public h_slice(start: number = 0, end: number = this.shape[0]): Self{
-        let new_matrix = Matrix.zero([end - start, this.shape[1]]);
+        let new_matrix = Object.getPrototypeOf(this).zero([end - start, this.shape[1]]) as Self;
         for(let i = start; i < end; i++){
             for(let j = 0; j < this.shape[1]; j++){
                 new_matrix.set(i - start, j, this.get(i, j));
+            }
+        }
+        return new_matrix;
+    }
+
+    public v_slice(start: number = 0, end: number = this.shape[1]): Self{
+        let new_matrix = Object.getPrototypeOf(this).zero([this.shape[0], end - start]) as Self;
+        for(let i = 0; i < this.shape[0]; i++){
+            for(let j = start; j < end; j++){
+                new_matrix.set(i, j - start, this.get(i, j));
             }
         }
         return new_matrix;

@@ -7,3 +7,6 @@
 [submodule "lib/libcint"]
 	path = lib/libcint
 	url = https://github.com/sunqm/libcint.git
+[submodule "lib/libxc"]
+	path = lib/libxc
+	url = https://gitlab.com/libxc/libxc.git

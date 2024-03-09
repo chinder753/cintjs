@@ -1,7 +1,3 @@
-import { i, isNaN } from "mathjs";
-
-
-
 export { Complex, ComplexArray }
 
 type FloatArray = Float32Array|Float64Array;

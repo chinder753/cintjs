@@ -1,0 +1,11 @@
+xc_mgga
+xc_mgga_exc
+xc_mgga_exc_vxc
+xc_mgga_vxc
+xc_mgga_exc_vxc_fxc
+xc_mgga_vxc_fxc
+xc_mgga_fxc
+xc_mgga_exc_vxc_fxc_kxc
+xc_mgga_vxc_fxc_kxc
+xc_mgga_kxc
+xc_mgga_lxc

@@ -1,0 +1,12 @@
+xc_lda_new
+xc_lda
+xc_lda_exc
+xc_lda_exc_vxc
+xc_lda_vxc
+xc_lda_exc_vxc_fxc
+xc_lda_vxc_fxc
+xc_lda_fxc
+xc_lda_exc_vxc_fxc_kxc
+xc_lda_vxc_fxc_kxc
+xc_lda_kxc
+xc_lda_lxc

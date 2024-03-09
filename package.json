@@ -6,9 +6,9 @@
   "version": "1.0.0",
   "devDependencies": {},
   "scripts": {
-    "prebuild": "bash tools/init.sh func_hf.txt && bash tools/cint_wasm.sh",
-    "build": "tsc --project src/tsconfig.json && cp lib/libcint/build/libcint.wasm dist/libcint",
-    "postbuild": "node ./dist/test/H2O.js"
+    "prebuild": "cd tools && bash init.sh && bash wasm_complie.sh",
+    "build": "bash tools/ts_complie.sh",
+    "postbuild": "node ./dist/test/matrix.js"
   },
   "author": "",
   "license": "ISC",

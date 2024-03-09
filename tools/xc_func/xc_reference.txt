@@ -1,0 +1,9 @@
+xc_reference
+xc_reference_doi
+xc_reference_key
+
+xc_version
+xc_version_string
+
+xc_func_reference_get_ref
+xc_func_reference_get_bibtex

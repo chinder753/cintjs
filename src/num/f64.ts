@@ -1,5 +1,7 @@
 import { Num } from "./num";
 
+export { Float64 }
+
 class Float64 implements Num<number, Float64>{
     public static one: Float64 = new Float64(1);
     public static zero: Float64 = new Float64(0);
@@ -53,5 +55,9 @@ class Float64 implements Num<number, Float64>{
     subSelf(other: Float64): this{
         this.value -= other.value;
         return this;
+    }
+
+    toString(): string{
+        return this.value.toString();
     }
 }

@@ -1,0 +1,14 @@
+xc_gga_new
+xc_gga
+xc_gga_exc
+xc_gga_exc_vxc
+xc_gga_vxc
+xc_gga_exc_vxc_fxc
+xc_gga_vxc_fxc
+xc_gga_fxc
+xc_gga_exc_vxc_fxc_kxc
+xc_gga_vxc_fxc_kxc
+xc_gga_kxc
+xc_gga_lxc
+xc_gga_ak13_get_asymptotic
+xc_gga_ak13_pars_get_asymptotic
