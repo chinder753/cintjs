@@ -1,17 +1,17 @@
 {
-  "dependencies": {
-    "@types/node": "^20.10.4"
-  },
   "name": "cint.js",
   "version": "1.0.0",
-  "devDependencies": {},
+  "author": "chinder",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
   "scripts": {
     "prebuild": "cd tools && bash init.sh && bash wasm_complie.sh",
     "build": "bash tools/ts_complie.sh",
-    "postbuild": "node ./dist/test/matrix.js"
+    "postbuild": "npm run test",
+    "test": "node ./dist/test/xc_test.js"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "type": "module"
+  "dependencies": {
+    "@types/node": "^20.10.4"
+  }
 }

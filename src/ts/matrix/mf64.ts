@@ -1,7 +1,7 @@
 import { Matrix } from "./matrix.js";
 import { Float64 } from "../num/f64.js";
 
-export { MatrixF64 }
+export { MatrixF64 };
 
 // @ts-ignore
 class MatrixF64 extends Matrix<Float64Array, Float64, MatrixF64>{

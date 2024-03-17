@@ -1,7 +1,7 @@
 // @ts-ignore
 import cint_wasm from "./libcint.mjs";
 
-import { ATM_SOLT, BAS_SOLT, CintData } from "../cint_data.js";
+import { ATM_SOLT, BAS_SOLT, CintData } from "./cint_data.js";
 
 type TypedArray =
     Int8Array

@@ -1,4 +1,5 @@
-export {Num}
+export { Num };
+
 interface Num<T, Self>{
 
     value: T;

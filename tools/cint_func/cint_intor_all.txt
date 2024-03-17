@@ -182,3 +182,5 @@ int1e_grids_spvsp
 int1e_ipiprinvipip
 int1e_ipipiprinvip
 int1e_ipipipiprinv
+int3c2e
+int2c2e

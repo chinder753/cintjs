@@ -1,6 +1,6 @@
 export { CintData };
 
-import { AtomGroup, JsonBasis } from "./extype";
+import { AtomGroup, JsonBasis } from "../ts/extype";
 
 
 export const enum ENV_GLOBAL_PARAMETERS{

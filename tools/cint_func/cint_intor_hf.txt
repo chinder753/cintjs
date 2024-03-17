@@ -6,4 +6,5 @@ int1e_ipkin
 int1e_ipnuc
 int2e_ip1
 int1e_rinv
-int3c2e_ip1
+int3c2e
+int2c2e

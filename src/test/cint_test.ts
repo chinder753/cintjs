@@ -1,6 +1,6 @@
-import { readXYZ2Group } from "../io.js";
-import { BSE } from "../bse.js";
-import { CintData } from "../cint_data.js";
+import { readXYZ2Group } from "../ts/io.js";
+import { BSE } from "../ts/bse.js";
+import { CintData } from "../libcint/cint_data.js";
 
 import cint from "../libcint/cint.js";
 
@@ -84,15 +84,11 @@ cint.then(Cint => {
     select_bas.delete();
     //
     let all_bas = cint.allBas();
-    console.log("\nfull_ovlp");
-    console.log(all_bas.int2c_full("_int1e_ovlp_cart"));
-    console.log("\npack_ovlp");
-    console.log(all_bas.int2c_pack("_int1e_ovlp_cart"));
-    console.log("\nH_core");
+    console.log("\nfull_ovlp\n", all_bas.int2c_full("_int1e_ovlp_cart"));
+    console.log("\npack_ovlp\n", all_bas.int2c_pack("_int1e_ovlp_cart"));
     let {dim: rank, data: H_core, storage: _storage} = all_bas.int2c_full("_int1e_kin_cart"),
         V = all_bas.int2c_full("_int1e_nuc_cart").data;
-    H_core = H_core.map((t, i) => t + V[i]);
-    console.log(H_core);
+    console.log("\nH_core\n", H_core.map((t, i) => t + V[i]));
     all_bas.delete();
     //
     cint.delete();

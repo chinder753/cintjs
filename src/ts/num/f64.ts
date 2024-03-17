@@ -1,6 +1,6 @@
 import { Num } from "./num";
 
-export { Float64 }
+export { Float64 };
 
 class Float64 implements Num<number, Float64>{
     public static one: Float64 = new Float64(1);
