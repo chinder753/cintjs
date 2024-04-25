@@ -1,5 +1,7 @@
 export { BinaryDeterminant };
 
+
+
 class BinaryDeterminant{
     constructor(nocc: number, nvir: number){
         let occ_bytes = Math.ceil(nocc / 8)

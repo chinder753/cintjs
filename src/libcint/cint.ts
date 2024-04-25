@@ -3,6 +3,8 @@ import cint_wasm from "./libcint.mjs";
 
 import { ATM_SOLT, BAS_SOLT, CintData } from "./cint_data.js";
 
+
+
 type TypedArray =
     Int8Array
     | Int16Array
@@ -20,22 +22,15 @@ async function ready(){
     // const CLASS_REGISTER = new FinalizationRegistry((v: WeakRef<any>) => v.deref().delete());
     // const ARRAY_REGISTER = new FinalizationRegistry(p => Cint._cint._free(p));
 
-    class IntegerCalculator{
+    class IntegralCalculator{
+        readonly natm: number;
+        readonly nbas: number;
+        readonly buf: Float64Array;
+        private p_atm: number;
+        private p_bas: number;
+        private p_env: number;
+        private shls: Int32Array;
         private _di: number[] = [];
-
-        get di(){
-            return this._di.map(x => x);
-        }
-
-        get index(){
-            let i = 0
-                , int_index: number[] = [];
-            this._di.forEach(x => {
-                int_index.push(i);
-                i += x;
-            });
-            return int_index;
-        }
 
         constructor(p_atm: number, natm: number
             , bas_p: number, nbas: number
@@ -57,13 +52,19 @@ async function ready(){
             // CLASS_REGISTER.register(this, new WeakRef(this));
         }
 
-        readonly natm: number;
-        readonly nbas: number;
-        readonly buf: Float64Array;
-        private p_atm: number;
-        private p_bas: number;
-        private p_env: number;
-        private shls: Int32Array;
+        get di(){
+            return this._di.map(x => x);
+        }
+
+        get index(){
+            let i = 0
+                , int_index: number[] = [];
+            this._di.forEach(x => {
+                int_index.push(i);
+                i += x;
+            });
+            return int_index;
+        }
 
         public intor(shls: number[], int_name: string){
             if(shls.length > 4 || shls.length < 2) throw "";
@@ -123,6 +124,8 @@ async function ready(){
         }
     }
 
+
+
     class Cint{
         static readonly _cint = cint;
 
@@ -176,6 +179,12 @@ async function ready(){
             return new Cint(cint_data.basis_index, cint_data.bas_template, cint_data.atm, cint_data.env);
         }
 
+        private atm: Int32Array;
+        private natm: number;
+        private basis_index: number[];
+        private bas_template: Int32Array[] = [];  // same as "coefficients" in BSE
+        private env: Float64Array;
+
         constructor(basis_index: number[], bas_template: Int32Array[], atm: Int32Array, env: Float64Array){
             this.basis_index = basis_index;
             bas_template.forEach(bas => {
@@ -186,12 +195,6 @@ async function ready(){
             this.env = Cint.moveToHeap(env);
             // CINT_REGISTER.register(this, new WeakRef(this));
         }
-
-        private atm: Int32Array;
-        private natm: number;
-        private basis_index: number[];
-        private bas_template: Int32Array[] = [];  // same as "coefficients" in BSE
-        private env: Float64Array;
 
         public delete(){
             this.bas_template.forEach(bas => {
@@ -215,7 +218,7 @@ async function ready(){
             return this;
         }
 
-        public selectBas(select_bas: { atm_index: number, shell_index: number }[]): IntegerCalculator{
+        public selectBas(select_bas: { atm_index: number, shell_index: number }[]): IntegralCalculator{
             let p_bas: number = Cint._cint._malloc(select_bas.length * BAS_SOLT.BAS_SLOTS * Int32Array.BYTES_PER_ELEMENT)
                 , bas_offset: number = p_bas / Int32Array.BYTES_PER_ELEMENT;
             select_bas.forEach(v => {
@@ -227,12 +230,12 @@ async function ready(){
                 bas[0] = v.atm_index;
                 bas_offset += BAS_SOLT.BAS_SLOTS;
             });
-            return new IntegerCalculator(this.atm.byteOffset, this.natm
+            return new IntegralCalculator(this.atm.byteOffset, this.natm
                 , p_bas, select_bas.length
                 , this.env.byteOffset);
         }
 
-        public allBas(): IntegerCalculator{
+        public allBas(): IntegralCalculator{
             let nbas = 0;
             this.basis_index.forEach((bas_index) => {
                 nbas += this.bas_template[bas_index].length / BAS_SOLT.BAS_SLOTS;
@@ -248,7 +251,7 @@ async function ready(){
                 Cint._cint.HEAP32.copyWithin(bas_offset, template_offset, template_offset + bas_template.length);
                 bas_offset += bas_template.length;
             });
-            return new IntegerCalculator(this.atm.byteOffset, this.natm
+            return new IntegralCalculator(this.atm.byteOffset, this.natm
                 , p_bas, nbas
                 , this.env.byteOffset);
         }

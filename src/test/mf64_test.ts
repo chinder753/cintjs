@@ -1,6 +1,8 @@
 import { MatrixF64 } from "../ts/matrix/mf64.js";
 import { Float64 } from "../ts/num/f64.js";
 
+
+
 let a: MatrixF64 = MatrixF64.fromArray([[new Float64(1), new Float64(2), new Float64(3)]
     , [new Float64(4), new Float64(5), new Float64(6)]]);
 

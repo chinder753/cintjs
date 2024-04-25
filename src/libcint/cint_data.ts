@@ -3,6 +3,7 @@ export { CintData };
 import { AtomGroup, JsonBasis } from "../ts/extype";
 
 
+
 export const enum ENV_GLOBAL_PARAMETERS{
     // global parameters in env
     // Overall cutoff for integral prescreening, value needs to be ~ln(threshold)
@@ -26,6 +27,8 @@ export const enum ENV_GLOBAL_PARAMETERS{
     PTR_ENV_START = 20
 }
 
+
+
 export const enum ATM_SOLT{
     CHARGE_OF,
     PTR_COORD,
@@ -35,6 +38,8 @@ export const enum ATM_SOLT{
     RESERVE_ATMSLOT,
     ATM_SLOTS
 }
+
+
 
 export const enum BAS_SOLT{
     ATOM_OF,
@@ -48,9 +53,13 @@ export const enum BAS_SOLT{
     BAS_SLOTS
 }
 
+
+
 export const enum ENV_OFFSET{
     ATM = 4
 }
+
+
 
 class CintData{
     public static fromGroup(groups: AtomGroup[], basis: JsonBasis[][]){
@@ -122,6 +131,18 @@ class CintData{
         });
 
         return new CintData(atm, env, basis_index, bas_template);
+    }
+
+    public basis_index: number[];
+    public bas_template: Int32Array[];  // same as "coefficients" in BSE
+    public atm: Int32Array;
+    public env: Float64Array;
+
+    constructor(atm: Int32Array, env: Float64Array, basis_index: number[], bas_template: Int32Array[]){
+        this.atm = atm;
+        this.env = env;
+        this.basis_index = basis_index;
+        this.bas_template = bas_template;
     }
 
     // ENV_GLOBAL_PARAMETERS
@@ -198,18 +219,6 @@ class CintData{
         if(PTR_GRIDS.length != ENV_GLOBAL_PARAMETERS.PTR_GRIDS - ENV_GLOBAL_PARAMETERS.PTR_ENV_START)
             this.env.set(PTR_GRIDS, ENV_GLOBAL_PARAMETERS.PTR_GRIDS);
     }
-
-    constructor(atm: Int32Array, env: Float64Array, basis_index: number[], bas_template: Int32Array[]){
-        this.atm = atm;
-        this.env = env;
-        this.basis_index = basis_index;
-        this.bas_template = bas_template;
-    }
-
-    public basis_index: number[];
-    public bas_template: Int32Array[];  // same as "coefficients" in BSE
-    public atm: Int32Array;
-    public env: Float64Array;
 
     public atm_coor(atm_i: number){
         let begin = ENV_GLOBAL_PARAMETERS.PTR_ENV_START + atm_i * ENV_OFFSET.ATM

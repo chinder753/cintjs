@@ -1,8 +1,14 @@
 export { Num };
 
+
+
 interface Num<T, Self>{
 
     value: T;
+
+    get neg(): Self;
+
+    get negSelf(): this;
 
     add(other: Self): Self;
 
@@ -22,9 +28,6 @@ interface Num<T, Self>{
 
     toString(): string;
 
-    get neg(): Self;
-
-    get negSelf(): this;
 }
 
 

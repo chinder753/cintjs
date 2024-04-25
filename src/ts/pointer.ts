@@ -1,4 +1,6 @@
-export { Pointer }
+export { Pointer };
+
+
 
 class Pointer{
     public p: number;
@@ -13,18 +15,19 @@ class Pointer{
     public f32: number;
     public f64: number;
     public pointer: number;
+
     constructor(p: number){
         this.p = p;
-        this.i8 = p
-        this.u8 = p
-        this.i16 = p / 2
-        this.u16 = p / 2
-        this.i32 = p / 4
-        this.u32 = p / 4
-        this.i64 = p / 8
-        this.u64 = p / 8
-        this.f32 = p / 4
-        this.f64 = p / 8
+        this.i8 = p;
+        this.u8 = p;
+        this.i16 = p / 2;
+        this.u16 = p / 2;
+        this.i32 = p / 4;
+        this.u32 = p / 4;
+        this.i64 = p / 8;
+        this.u64 = p / 8;
+        this.f32 = p / 4;
+        this.f64 = p / 8;
         this.pointer = p / 4;
     }
 
@@ -49,7 +52,7 @@ class Pointer{
     }
 
     public movePointer(){
-        this.p = this.p + 4
+        this.p = this.p + 4;
     }
 
     public move8(){

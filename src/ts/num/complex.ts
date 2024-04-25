@@ -1,5 +1,7 @@
 import { Num } from "./num";
 
+
+
 export { Complex };
 
 type complex = [number, number];  // [real, imag]
@@ -9,14 +11,10 @@ class Complex implements Num<complex, Complex>{
     public static zero = new Complex([0, 0]);
     public static one = new Complex([1, 0]);
 
-    get neg(): Complex{
-        return new Complex([-this.value[0], -this.value[1]]);
-    }
+    value: complex;
 
-    get negSelf(): this{
-        this.value[0] = -this.value[0];
-        this.value[1] = -this.value[1];
-        return this;
+    constructor(value: complex){
+        this.value = value;
     }
 
     get conj(): Complex{
@@ -28,11 +26,15 @@ class Complex implements Num<complex, Complex>{
         return this;
     }
 
-    constructor(value: complex){
-        this.value = value;
+    get neg(): Complex{
+        return new Complex([-this.value[0], -this.value[1]]);
     }
 
-    value: complex;
+    get negSelf(): this{
+        this.value[0] = -this.value[0];
+        this.value[1] = -this.value[1];
+        return this;
+    }
 
     add(other: Complex): Complex{
         return new Complex([this.value[0] + this.value[0], this.value[1] + this.value[1]]);
@@ -44,18 +46,13 @@ class Complex implements Num<complex, Complex>{
         return this;
     }
 
-    div(other: Complex): Complex{
-        let abs_other = other.value[0] ** 2 + other.value[1] ** 2;
-        return new Complex([
-            (this.value[0] * other.value[0] + this.value[1] * other.value[1]) / abs_other
-            , (-this.value[0] * other.value[1] - this.value[1] * other.value[0]) / abs_other]);
+    sub(other: Complex): Complex{
+        return new Complex([this.value[0] - this.value[0], this.value[1] - this.value[1]]);
     }
 
-    divSelf(other: Complex): this{
-        let abs_other = other.value[0] ** 2 + other.value[1] ** 2;
-        [this.value[0], this.value[1]] = [
-            (this.value[0] * other.value[0] + this.value[1] * other.value[1]) / abs_other
-            , (-this.value[0] * other.value[1] - this.value[1] * other.value[0]) / abs_other];
+    subSelf(other: Complex): this{
+        this.value[0] -= this.value[0];
+        this.value[1] -= this.value[1];
         return this;
     }
 
@@ -72,13 +69,18 @@ class Complex implements Num<complex, Complex>{
         return this;
     }
 
-    sub(other: Complex): Complex{
-        return new Complex([this.value[0] - this.value[0], this.value[1] - this.value[1]]);
+    div(other: Complex): Complex{
+        let abs_other = other.value[0] ** 2 + other.value[1] ** 2;
+        return new Complex([
+            (this.value[0] * other.value[0] + this.value[1] * other.value[1]) / abs_other
+            , (-this.value[0] * other.value[1] - this.value[1] * other.value[0]) / abs_other]);
     }
 
-    subSelf(other: Complex): this{
-        this.value[0] -= this.value[0];
-        this.value[1] -= this.value[1];
+    divSelf(other: Complex): this{
+        let abs_other = other.value[0] ** 2 + other.value[1] ** 2;
+        [this.value[0], this.value[1]] = [
+            (this.value[0] * other.value[0] + this.value[1] * other.value[1]) / abs_other
+            , (-this.value[0] * other.value[1] - this.value[1] * other.value[0]) / abs_other];
         return this;
     }
 

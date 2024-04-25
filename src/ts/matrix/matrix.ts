@@ -12,7 +12,11 @@
 
 import { Num } from "../num/num.js";
 
+
+
 export { Matrix };
+
+
 
 abstract class Matrix<Storage extends {
     length: number
@@ -40,7 +44,20 @@ abstract class Matrix<Storage extends {
         return a;
     }
 
+    readonly shape: [number, number];
+    readonly array: Storage;
+
+    constructor(shape: [number, number], array: Storage){
+        if(shape[0] * shape[1] != array.length) throw "";
+        this.shape = shape;
+        this.array = array;
+    }
+
     abstract get copy(): Self;
+
+    abstract get(i: number, j: number): Ele;
+
+    abstract set(i: number, j: number, value: Ele): void;
 
     get transpose(): Self{
         // @ts-ignore
@@ -52,19 +69,6 @@ abstract class Matrix<Storage extends {
         }
         return c;
     }
-
-    constructor(shape: [number, number], array: Storage){
-        if(shape[0] * shape[1] != array.length) throw "";
-        this.shape = shape;
-        this.array = array;
-    }
-
-    readonly shape: [number, number];
-    readonly array: Storage;
-
-    abstract get(i: number, j: number): Ele;
-
-    abstract set(i: number, j: number, value: Ele): void;
 
     print(comment: string = ""): void{
         console.log(comment);

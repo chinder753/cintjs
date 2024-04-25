@@ -9,7 +9,7 @@
     "prebuild": "cd tools && bash init.sh && bash wasm_complie.sh",
     "build": "bash tools/ts_complie.sh",
     "postbuild": "npm run test",
-    "test": "node ./dist/test/xc_test.js"
+    "test": "node ./dist/test/cint_test.js"
   },
   "dependencies": {
     "@types/node": "^20.10.4"

@@ -2,6 +2,8 @@
 import xc_wasm from "./libxc.mjs";
 import { Pointer } from "../ts/pointer";
 
+
+
 const XC_UNPOLARIZED = 1;
 const XC_POLARIZED = 2;
 
@@ -14,16 +16,18 @@ const XC_EXCHANGE_CORRELATION = 2;
 const XC_KINETIC = 3;
 
 const XC_FAMILY = {
-    UNKNOWN : -1
-    , LDA : 1
-    , GGA : 2
-    , MGGA : 4
-    , LCA : 8
-    , OEP : 16
-    , HYB_GGA : 32
-    , HYB_MGGA : 64
-    , HYB_LDA : 128
-}
+    UNKNOWN: -1
+    , LDA: 1
+    , GGA: 2
+    , MGGA: 4
+    , LCA: 8
+    , OEP: 16
+    , HYB_GGA: 32
+    , HYB_MGGA: 64
+    , HYB_LDA: 128
+};
+
+
 
 /* flags that can be used in info.flags. Don't reorder these since it
    will break the ABI of the library. */
@@ -54,12 +58,14 @@ const enum XC_FLAGS{
     , HAVE_ALL = XC_FLAGS.HAVE_EXC | XC_FLAGS.HAVE_VXC | XC_FLAGS.HAVE_FXC | XC_FLAGS.HAVE_KXC | XC_FLAGS.HAVE_LXC
 }
 
+
+
 /* This magic value means use default parameter */
 const XC_EXT_PARAMS_DEFAULT = -999998888;
 
 const XC_MAX_REFERENCES = 5;
-const FUNC_PARAMS_TYPE_SIZE = 4+4+4+4+4;
-const FUNCS_VARIANTS_SIZE = 4*5+4*5;
+const FUNC_PARAMS_TYPE_SIZE = 4 + 4 + 4 + 4 + 4;
+const FUNCS_VARIANTS_SIZE = 4 * 5 + 4 * 5;
 
 const LEBEDEV_ORDER = {
     0: 1,
@@ -98,26 +104,23 @@ const LEBEDEV_ORDER = {
 };
 
 
-
-
-
-
 async function ready(){
     let xc: any;
     await xc_wasm().then<any, never>((cint_t: any) => xc = cint_t);
 
     function read_c_string(p: number): [String, number]{
         let offset = p;
-        while(xc["HEAP8"][offset]!="\0") offset+=1;
+        while(xc["HEAP8"][offset] != "\0") offset += 1;
         return [String.fromCharCode(...xc["HEAP8"].subarray(p, offset)), offset];
     }
-    
+
     class func_reference_type{
         readonly p: Pointer;
         readonly ref: String;
         readonly doi: String;
         readonly bibtex: String;
         readonly key: String;
+
         constructor(p: Pointer){
             this.p = p;
             this.ref = read_c_string(xc["_xc_func_reference_get_ref"](p))[0];
@@ -138,14 +141,13 @@ async function ready(){
                         changing the value effectively changes the functional! */
         readonly descriptions: String[] = []; /* long description of the parameters */
         readonly values: Float64Array; /* default values of the parameters */
-        set: (p_xc_func_type: Pointer, p_ext_params: Pointer) => void;
 
         constructor(p: Pointer){
             this.p = p;
             this.n = xc["HEAP32"][this.p.i32];
-            let p_names = xc["HEAP32"][this.p.i32+1]
-                , p_descriptions = xc["HEAP32"][this.p.i32+2];
-            for(let i=0; i<this.n; i++){
+            let p_names = xc["HEAP32"][this.p.i32 + 1]
+                , p_descriptions = xc["HEAP32"][this.p.i32 + 2];
+            for(let i = 0; i < this.n; i++){
                 let temp_names: String
                     , temp_descriptions: String;
                 [temp_names, p_names] = read_c_string(p_names);
@@ -153,32 +155,29 @@ async function ready(){
                 this.names.push(temp_names);
                 this.descriptions.push(temp_descriptions);
             }
-            this.values = xc["HEAPF64"].subarray(xc["HEAP32"][this.p.i32+3], xc["HEAP32"][this.p.i32+3]+this.n);
-            this.set = xc.table.get(xc["HEAP32"][this.p.i32+4]);
+            this.values = xc["HEAPF64"].subarray(xc["HEAP32"][this.p.i32 + 3], xc["HEAP32"][this.p.i32 + 3] + this.n);
+            this.set = xc.table.get(xc["HEAP32"][this.p.i32 + 4]);
         }
+
+        set: (p_xc_func_type: Pointer, p_ext_params: Pointer) => void;
     }
 
     class xc_func_info_type{
         public p: Pointer;
         public number: number;
         public kind: number;     /* XC_EXCHANGE, XC_CORRELATION, XC_EXCHANGE_CORRELATION, XC_KINETIC */
-
         public name: String;     /* name of the functional, e.g. "PBE" */
         public family: number;   /* type of the functional, e.g. XC_FAMILY_GGA */
         public refs: func_reference_type[] = [];  /* index of the references */
-
         public flags: number;    /* see above for a list of possible flags */
-
-        public dens_threshold: number;
-
-        /* this allows to have external parameters in the functional */
-        public ext_params: func_params_type;
-
-        init: (p_xc_func_type: Pointer) => void;
-        end: (p_xc_func_type: Pointer) => void;
-        public p_lda: number;
-        public p_gga: number;
-        public p_mgga: number;
+        // public dens_threshold: number;
+        // /* this allows to have external parameters in the functional */
+        // public ext_params: func_params_type;
+        // public p_lda: number;
+        // public p_gga: number;
+        // public p_mgga: number;
+        // init: (p_xc_func_type: Pointer) => void;
+        // end: (p_xc_func_type: Pointer) => void;
 
         constructor(p: Pointer){
             this.p = p;
@@ -186,11 +185,12 @@ async function ready(){
             this.kind = xc["_xc_func_info_get_kind"](this.p);
             this.name = read_c_string(xc["_xc_func_info_get_name"](this.p))[0];
             this.family = xc["_xc_func_info_get_family"](this.p);
-            for(let i=0; i<XC_MAX_REFERENCES; i++){
+            for(let i = 0; i < XC_MAX_REFERENCES; i++){
                 this.refs.push(xc["_xc_func_info_get_references"](this.p, i));
             }
             this.flags = xc["_xc_func_info_get_flags"](this.p);
         }
+
     }
 
     class XC{

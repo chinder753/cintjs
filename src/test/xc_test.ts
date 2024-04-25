@@ -1,5 +1,7 @@
 import xc_wasm from "../libxc/xc.js";
 
+
+
 xc_wasm.then(XC => {
     let ver_p = 1000;
     XC._xc["_xc_version"](ver_p, ver_p + 4, ver_p + 8);
