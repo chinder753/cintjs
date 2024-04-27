@@ -1,6 +1,7 @@
 int1e_ovlp
 int1e_nuc
 int1e_kin
+int2e
 int1e_ipovlp
 int1e_ipkin
 int1e_ipnuc

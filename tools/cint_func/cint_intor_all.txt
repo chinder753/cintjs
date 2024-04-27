@@ -107,6 +107,7 @@ int1e_ipspnucsp
 int1e_ipsprinvsp
 int1e_ippnucp
 int1e_ipprinvp
+int2e
 int2e_ip1
 int2e_ip2
 int2e_ipspsp1
@@ -159,6 +160,7 @@ int3c2e_pvp1
 int3c2e_pvxp1
 int2c2e_ip1
 int2c2e_ip2
+int3c2e
 int3c2e_ig1
 int3c2e_spsp1
 int3c2e_ipspsp1
@@ -182,5 +184,4 @@ int1e_grids_spvsp
 int1e_ipiprinvipip
 int1e_ipipiprinvip
 int1e_ipipipiprinv
-int3c2e
 int2c2e

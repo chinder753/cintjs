@@ -38,25 +38,25 @@ async function ready(){
             for(let i = 0; i < nbas; i++){
                 this._di.push(Cint._cint._CINTcgto_cart(i, bas_p));
             }
-            let shls_p = cint._malloc(4 * Int32Array.BYTES_PER_ELEMENT)
+            let shls_p = cint._malloc(4 * Int32Array.BYTES_PER_ELEMENT) / 4
                 , max_di = Math.max(...this._di)
                 , buf_len = max_di * max_di * max_di * max_di
-                , buf_p = cint._malloc(buf_len * Float64Array.BYTES_PER_ELEMENT);
+                , buf_p = cint._malloc(buf_len * Float64Array.BYTES_PER_ELEMENT) / 8;
             this.p_atm = p_atm;
             this.natm = natm;
             this.p_bas = bas_p;
             this.nbas = nbas;
             this.p_env = p_env;
-            this.shls = cint.HEAP32.subarray(shls_p / 4, shls_p / 4 + 4);
-            this.buf = cint.HEAPF64.subarray(buf_p / 8, buf_p / 8 + buf_len);
+            this.shls = cint.HEAP32.subarray(shls_p, shls_p + 4);
+            this.buf = cint.HEAPF64.subarray(buf_p, buf_p + buf_len);
             // CLASS_REGISTER.register(this, new WeakRef(this));
         }
 
-        get di(){
+        get di(): number[]{
             return this._di.map(x => x);
         }
 
-        get index(){
+        get index(): number[]{
             let i = 0
                 , int_index: number[] = [];
             this._di.forEach(x => {
@@ -80,22 +80,20 @@ async function ready(){
 
         public int2c_full(int_name: string): { dim: number, storage: "full", data: Float64Array }{
             let int_index = this.index
-                , di = this.di
+                , di = this._di
                 , data_dim = di.reduce((p, c) => p + c)
                 , data = new Float64Array(data_dim * data_dim);
-            for(let i = 0; i < this.nbas; i++){
-                for(let j = 0; j <= i; j++){
-                    let subdata = this.intor([i, j], int_name);
-                    for(let m = 0; m < di[i]; m++){
-                        for(let n = 0; n < di[j]; n++){
-                            data[data_dim * (int_index[i] + m) + int_index[j] + n] = subdata[di[j] * m + n];
+            for(let mu = 0; mu < this.nbas; mu++){
+                for(let nu = 0; nu <= mu; nu++){
+                    let subdata = this.intor([mu, nu], int_name);
+                    for(let i = 0; i < di[mu]; i++){
+                        let data_index_1 = int_index[mu] + i
+                        for(let j = 0; j < di[nu]; j++){
+                            let data_index_2 = int_index[nu] + j
+                            data[data_dim * data_index_1 + data_index_2] = subdata[di[nu] * i + j];
+                            data[data_dim * data_index_2 + data_index_1] = subdata[di[nu] * i + j];
                         }
                     }
-                }
-            }
-            for(let i = 0; i < data_dim; i++){
-                for(let j = 0; j < data_dim; j++){
-                    data[data_dim * i + j] = data[data_dim * j + i];
                 }
             }
             return {dim: data_dim, storage: "full", data: data};
@@ -116,6 +114,55 @@ async function ready(){
                 }
             }
             return {dim: data_dim, storage: "pack", data: data};
+        }
+
+        public int4c_full(int_name: string): { dim: number, storage: "full", data: Float64Array }{
+            let int_index = this.index
+                , di = this.di
+                , data_dim = di.reduce((p, c) => p + c)
+                , data = new Float64Array(data_dim * data_dim * data_dim * data_dim)
+                , matrix_dim = data_dim * data_dim;
+            for(let mu = 0; mu < this.nbas; mu++){
+                for(let nu = 0; nu <= mu; nu++){
+                    // let bas_index_1 = mu*this.nbas + nu;
+                    //
+                    for(let lambda = 0; lambda < this.nbas; lambda++){
+                        for(let sigma = 0; sigma <= lambda; sigma++){
+                            // if(bas_index_1 == lambda*this.nbas + sigma && mu != nu) continue;
+                            let subdata = this.intor([mu, nu, lambda, sigma], int_name);
+                            //
+                            for(let i = 0; i < di[mu]; i++){
+                                for(let j = 0; j < di[nu]; j++){
+                                    let data_index_1 = data_dim * (int_index[mu] + i) + int_index[nu] + j
+                                        , data_index_1_sym = data_dim * (int_index[nu] + j) + int_index[mu] + i
+                                        , subdata_index_1 = di[nu] * i + j
+                                        , submatrix_dim = di[lambda] * di[sigma];
+                                    //
+                                    for(let k = 0; k < di[lambda]; k++){
+                                        for(let l = 0; l < di[sigma]; l++){
+                                            let data_index_2 = data_dim * (int_index[lambda] + k) + (int_index[sigma] + l)
+                                                , data_index_2_sym = data_dim * (int_index[sigma] + l) + (int_index[lambda] + k)
+                                                , subdata_index_2 = di[sigma] * k + l
+                                                , int = subdata[submatrix_dim * subdata_index_1 + subdata_index_2];
+                                            data[matrix_dim * data_index_1 + data_index_2] = int;
+                                            data[matrix_dim * data_index_1 + data_index_2_sym] = int;
+                                            data[matrix_dim * data_index_1_sym + data_index_2] = int;
+                                            data[matrix_dim * data_index_1_sym + data_index_2_sym] = int;
+
+                                            // data[matrix_dim * data_index_2 + data_index_1] = int;
+                                            // data[matrix_dim * data_index_2 + data_index_1_sym] = int;
+                                            // data[matrix_dim * data_index_2_sym + data_index_1] = int;
+                                            // data[matrix_dim * data_index_2_sym + data_index_1_sym] = int;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+            return {dim: data_dim, storage: "full", data: data};
         }
 
         public delete(){
